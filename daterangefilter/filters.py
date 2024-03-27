@@ -29,19 +29,27 @@ class DateRangeFilter(admin.FieldListFilter):
                 field = model._meta.get_field(field_path)
                 
             if isinstance(field, models.DateTimeField):
+                if isinstance(self.lookup_gte, list):
+                    self.lookup_gte = self.lookup_gte[0]
+
+                if isinstance(self.lookup_lte, list):
+                    self.lookup_lte = self.lookup_lte[-1]
+
                 try:
-                    gte_date = datetime.datetime.strptime(self.lookup_gte[0], '%Y-%m-%d')
-                    lte_date = datetime.datetime.strptime(self.lookup_lte[0], '%Y-%m-%d')
+                    gte_date = datetime.datetime.strptime(self.lookup_gte, '%Y-%m-%d')
+                    lte_date = datetime.datetime.strptime(self.lookup_lte, '%Y-%m-%d')
                     lte_date = lte_date + datetime.timedelta(seconds=3600*24-1)
                     if settings.USE_TZ:
                         gte_date = timezone.make_aware(gte_date, timezone.get_current_timezone())
                         lte_date = timezone.make_aware(lte_date, timezone.get_current_timezone())
+
                     params[self.lookup_kwarg_gte] = gte_date.strftime('%Y-%m-%d %H:%M:%S%z')
                     params[self.lookup_kwarg_lte] = lte_date.strftime('%Y-%m-%d %H:%M:%S%z')
                 except ValueError:
                     messages.add_message(request, messages.ERROR, _("Invalid date for '%(field_name)s' field range filter") % {'field_name': field.verbose_name})
         else:
             self.lookup_val = ''
+
         super(DateRangeFilter, self).__init__(field, request, params, model, model_admin, field_path)
 
     def get_template(self):
