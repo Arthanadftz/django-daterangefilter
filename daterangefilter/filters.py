@@ -30,8 +30,8 @@ class DateRangeFilter(admin.FieldListFilter):
                 
             if isinstance(field, models.DateTimeField):
                 try:
-                    gte_date = datetime.datetime.strptime(self.lookup_gte, '%Y-%m-%d')
-                    lte_date = datetime.datetime.strptime(self.lookup_lte, '%Y-%m-%d')
+                    gte_date = datetime.datetime.strptime(self.lookup_gte[0], '%Y-%m-%d')
+                    lte_date = datetime.datetime.strptime(self.lookup_lte[0], '%Y-%m-%d')
                     lte_date = lte_date + datetime.timedelta(seconds=3600*24-1)
                     if settings.USE_TZ:
                         gte_date = timezone.make_aware(gte_date, timezone.get_current_timezone())
